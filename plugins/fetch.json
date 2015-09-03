@@ -1,0 +1,9 @@
+{
+    "com.evothings.ble": {
+        "source": {
+            "type": "git",
+            "url": "https://github.com/evothings/cordova-ble.git",
+            "subdir": "."
+        }
+    }
+}
