@@ -5,5 +5,11 @@
             "url": "https://github.com/evothings/cordova-ble.git",
             "subdir": "."
         }
+    },
+    "org.apache.cordova.dialogs": {
+        "source": {
+            "type": "registry",
+            "id": "org.apache.cordova.dialogs"
+        }
     }
 }

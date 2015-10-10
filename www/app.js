@@ -32,7 +32,15 @@ app.DFRBLU_TX_UUID_DESCRIPTOR = '00002902-0000-1000-8000-00805f9b34fb';
 app.initialize = function() {
 
 	app.connected = false;
+    app.disconnect();
 };
+
+
+// val = ((long )b[0]) << 24;
+// val |= ((long )b[1]) << 16;
+// val |= ((long )b[2]) << 8;
+// val |= b[3];
+
 
 app.startScan = function() {
 
@@ -45,10 +53,10 @@ app.startScan = function() {
 	var htmlString = '<img src="img/loader_small.gif" style="display:inline; vertical-align:middle">' +
 					'<p style="display:inline">   Scanning...</p>';
 
+       
 	$( "#scanResultView" ).append( $( htmlString ) );
 
 	$( "#scanResultView" ).show();
-
 	function onScanSuccess(device) {
 
 		if(device.name != null) {
@@ -79,7 +87,9 @@ app.startScan = function() {
 	evothings.easyble.startScan(onScanSuccess, onScanFailure); 
 
 	$( "#startView" ).hide();
+     
 };
+
 
 app.setLoadingLabel = function(message) {
 	
@@ -104,11 +114,11 @@ app.connectTo = function(address) {
 				app.device = device;
 
 				console.log('Connected to ' + device.name);
-
+		    
 				$( "#loadingView" ).hide();
-				$( "#scanResultView" ).hide();
+		                $( "#scanResultView" ).hide();
 				$( "#controlView" ).show();
-
+		                $( "#controlView2" ).hide();
 				device.enableNotification(app.DFRBLU_CHAR_RXTX_UUID, app.receivedData, function(errorcode){console.log('BLE enableNotification error: ' + errorCode);});
 
 			};
@@ -145,7 +155,31 @@ app.connectTo = function(address) {
 	device.connect(onConnectSuccess, onConnectFailure);
 };
 
-app.sendData = function(data) {
+app.startScanTest = function() {
+				$( "#loadingView" ).hide();
+                                $( "#startView" ).hide();
+		                $( "#scanResultView" ).hide();
+				$( "#controlView" ).show();
+                                $( "#controlView2" ).hide();
+
+};
+app.pageTwo = function() {
+				$( "#loadingView" ).hide();
+		                $( "#scanResultView" ).hide();
+                                $( "#controlView" ).hide();
+				$( "#controlView2" ).show();
+                                $( "#startView" ).hide();
+
+};
+app.pageOne = function() {
+				$( "#loadingView" ).hide();
+		                $( "#scanResultView" ).hide();
+                                $( "#controlView" ).show();
+				$( "#controlView2" ).hide();
+                                $( "#startView" ).hide();
+};
+
+app.sendData = function(dataStr) {
 
 	if(app.connected) {
 
@@ -157,10 +191,10 @@ app.sendData = function(data) {
 		function onMessageSendFailure(errorCode){
 
 			console.log('Failed to send data with error: ' + errorCode);
-			app.disconnect('Failed to send data');
+ 			app.disconnect('Failed to send data');
 		};
+                var  data = evothings.ble.toUtf8(dataStr);
 
-		data = new Uint8Array(data);
 
 		app.device.writeCharacteristic(app.DFRBLU_CHAR_RXTX_UUID, data, onMessageSendSucces, onMessageSendFailure);
 	}
@@ -176,28 +210,74 @@ app.sendData = function(data) {
 
 app.receivedData = function(data) {
 
-	if(app.connected) {	
-		var data = new Uint8Array(data);
 
-		if (data[0] === 0xAD) {
+    var data = new Uint8Array(data);
+    
+    if (data[0] === 0xAD) {
+	
+	console.log('Data received: [' + data[0] +', ' + data[1] +', ' + data[2] + ']');
+	var value = 520;
+	if(Math.random()<0.5)
+	{value=512;}
+//	var value = (data[2] << 8) | data[1];
+//	alert(value);
+	$( '#result').text(value);
+//	$( '#result').attr('value',value);
+//	alert($('#result').text())
+	
+    }
+    //conductivity success/fail
+    else if(data[0] === 0xAE ){
+	alert("Calibration Completed");
+//        $('#calResult').text('tick');
 
-			console.log('Data received: [' + data[0] +', ' + data[1] +', ' + data[2] + ']');
+    }
+    
+    else if(data[0] === 0xAF ){
+//	 $('#calFinish').text('tick');
+	alert("Reset to factory default");
+    }        
+  else if(data[0] === 0xAC ){
+//	 $('#calFinish').text('tick');
+	alert("Sampling Rate changed");
+    }    
 
-			var value = (data[2] << 8) | data[1];
+    
 
-			console.log(value);
+   // try{
+    //    var value = (data[2] << 8) | data[1];
+     //   var  dataStr = evothings.ble.fromUtf8(data);
+//	$( '#result').text(dataStr);
+  //  }catch(err){	$( '#result').text(err);}
+	
+//	if(app.connected) {	
+	   // alert("Data received");
+	  //  var dataStr = evothings.ble.fromUtf(data);//new Uint8Array(data);
+	  //  var ua =  new Uint8Array(data);
+           // var dataStr = evothings.ble.fromUtf(d);
 
-			$( '#analogDigitalResult').text(value);
-		};
-	}
-	else {
+	  //  var dataStr = String.fromCharCode.apply(String,ua);
+	    //var test = decodeURIComponent(escstr);
+  //  var value;
+//	if (data[0] === 0xAD) {
+//	    value = (data[2] << 8) | data[1];
+//	    $( '#result').text(value);
+//	}
+	  //  console.log(value);
 
+	//	if (data[0] === 0xAD) {
+	//		var value =  data[1];
+//			$( '#result').text(value);
+//		}
+//	}
+//	else {
+//	     	$( '#result').text("not connected");   
 	// Disconnect and show an error message to the user.
-	app.disconnect('Disconnected');
+//	app.disconnect('Disconnected');
 
 	// Write debug information to console
-	console.log('Error - No device connected.');
-	}
+//	console.log('Error - No device connected.');
+//	}
 
 };
 
@@ -220,6 +300,8 @@ app.disconnect = function(errorMessage) {
 	$( "#scanResultView" ).hide();
 	$( "#scanResultView" ).empty();
 	$( "#controlView" ).hide();
+	$( "#controlView2" ).hide();
 	$( "#startView" ).show();
+      
 
 };

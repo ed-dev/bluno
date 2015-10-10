@@ -1,0 +1,3 @@
+[submodule "wqmd"]
+	path = wqmd
+	url = ../../calebkeene/wqmd.git
